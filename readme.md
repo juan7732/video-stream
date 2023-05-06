@@ -1,19 +1,19 @@
-# Vision Stream flask server for Raspberry Pi Docker Image
+# Vision Stream 
 
-Simple flask server that streams the Raspberry Pi camera to a web browser.
+Going with go this time
 
 ## Usage
 
 ### Build the image
 
 ```bash
-docker build -t vision-stream .
+docker build -t video-stream-go .
 ```
 
 ### Run the container
 
 ```bash
-docker run -d --name video_streaming_app --restart always --device /dev/video0:/dev/video0 -p 8000:8000 vision-stream
+docker run --rm --device=/dev/video0:/dev/video0 -p 8000:8000 video-stream-go
 ```
 
 ### Access the stream

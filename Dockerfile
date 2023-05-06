@@ -1,14 +1,13 @@
-FROM python:3.8-slim
+FROM golang:1.17
 
 WORKDIR /app
 
-RUN python3 -m pip install --upgrade pip
-RUN apt update
-RUN apt-get install build-essential libopencv-dev -y
-
-COPY requirements.txt requirements.txt
-RUN python3 -m pip install --no-binary opencv-python-headless,opencv-contrib-python-headless -r requirements.txt
-
 COPY . .
 
-CMD ["python3", "main.py"]
+RUN go mod init video-stream-go
+RUN go get -u github.com/blackjack/webcam
+RUN go build -o main main.go
+
+EXPOSE 8000
+
+CMD ["./main"]
