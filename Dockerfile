@@ -2,6 +2,7 @@ FROM python:3.8-slim
 
 WORKDIR /app
 
+RUN python3 -m pip install --upgrade pip
 RUN apt update
 RUN apt-get install build-essential -y
 
