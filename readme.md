@@ -14,7 +14,7 @@ docker build -t go-pi-camera .
 ### Run the container
 
 ```bash
-docker run -d --name vision-stream --restart always --rm -p 8080:8080 --device /dev/video0:/dev/video0 go-pi-camera
+docker run -d --name vision-stream --restart always -p 8080:8080 --device /dev/video0:/dev/video0 go-pi-camera
 
 ```
 

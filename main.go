@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 	"bytes"
 	"image"
 	"image/jpeg"
@@ -85,5 +86,7 @@ func streamHandler(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Error encoding frame: %v", err)
 			continue
 		}
+
+		time.Sleep(33 * time.Millisecond)
 	}
 }
