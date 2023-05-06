@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN python3 -m pip install --upgrade pip
 RUN apt update
-RUN apt-get install build-essential -y
+RUN apt-get install build-essential libopencv-dev -y
 
 COPY requirements.txt requirements.txt
 RUN python3 -m pip install -r requirements.txt
