@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"bytes"
+	"image"
 	"image/jpeg"
 	"log"
 	"mime/multipart"
@@ -10,7 +12,6 @@ import (
 
 	"github.com/korandiz/v4l"
 )
-
 
 const (
 	cameraDevice = "/dev/video0"
@@ -52,9 +53,21 @@ func streamHandler(w http.ResponseWriter, r *http.Request) {
 	multiPartWriter.SetBoundary(boundary)
 
 	for {
+		err := device.TurnOn()
+		if err != nil {
+			log.Printf("Error turning on device: %v", err)
+			continue
+		}
+
 		frame, err := device.Capture()
 		if err != nil {
 			log.Printf("Error capturing frame: %v", err)
+			continue
+		}
+
+		img, _, err := image.Decode(bytes.NewReader(frame.Data))
+		if err != nil {
+			log.Printf("Error decoding frame: %v", err)
 			continue
 		}
 
@@ -66,9 +79,15 @@ func streamHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		err = jpeg.Encode(partWriter, frame.Image, &jpeg.Options{Quality: 75})
+		err = jpeg.Encode(partWriter, img, &jpeg.Options{Quality: 75})
 		if err != nil {
 			log.Printf("Error encoding frame: %v", err)
+			continue
+		}
+
+		err = device.TurnOff()
+		if err != nil {
+			log.Printf("Error turning off device: %v", err)
 			continue
 		}
 	}
