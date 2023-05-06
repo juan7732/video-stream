@@ -7,13 +7,15 @@ Going with go this time
 ### Build the image
 
 ```bash
-docker build -t go-rpi-camera-stream .
+docker build -t go-pi-camera .
+
 ```
 
 ### Run the container
 
 ```bash
-docker run -d --name go-rpi-camera-stream --restart always -p 8080:8080 go-rpi-camera-stream
+docker run -d --name vision-stream --restart always --rm -p 8080:8080 --device /dev/video0:/dev/video0 go-pi-camera
+
 ```
 
 ### Access the stream
