@@ -53,19 +53,20 @@ func streamHandler(w http.ResponseWriter, r *http.Request) {
 	multiPartWriter.SetBoundary(boundary)
 
 	for {
-		err := device.TurnOn()
-		if err != nil {
-			log.Printf("Error turning on device: %v", err)
-			continue
-		}
-
 		frame, err := device.Capture()
 		if err != nil {
 			log.Printf("Error capturing frame: %v", err)
 			continue
 		}
 
-		img, _, err := image.Decode(bytes.NewReader(frame.Data))
+		frameData := make([]byte, frame.Size())
+		_, err = frame.Read(frameData)
+		if err != nil {
+			log.Printf("Error reading frame data: %v", err)
+			continue
+		}
+
+		img, _, err := image.Decode(bytes.NewReader(frameData))
 		if err != nil {
 			log.Printf("Error decoding frame: %v", err)
 			continue
@@ -82,12 +83,6 @@ func streamHandler(w http.ResponseWriter, r *http.Request) {
 		err = jpeg.Encode(partWriter, img, &jpeg.Options{Quality: 75})
 		if err != nil {
 			log.Printf("Error encoding frame: %v", err)
-			continue
-		}
-
-		err = device.TurnOff()
-		if err != nil {
-			log.Printf("Error turning off device: %v", err)
 			continue
 		}
 	}
