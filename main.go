@@ -2,20 +2,16 @@ package main
 
 import (
 	"fmt"
-	"time"
-	"bytes"
-	"image"
-	"image/jpeg"
 	"log"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
 
-	"github.com/korandiz/v4l"
+	"gocv.io/x/gocv"
 )
 
 const (
-	cameraDevice = "/dev/video0"
+	cameraDevice = 0
 	boundary     = "frame"
 	listenAddr   = ":8080"
 )
@@ -33,7 +29,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		<html>
 		<head><title>Go Pi Camera Stream</title></head>
 		<body>
-			<h1>Zora's Web Stream</h1>
+			<h1>Zora's Webstream</h1>
 			<img src="/stream" style="width:640px;height:480px;" />
 		</body>
 		</html>
@@ -42,12 +38,15 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func streamHandler(w http.ResponseWriter, r *http.Request) {
-	device, err := v4l.Open(cameraDevice)
+	webcam, err := gocv.OpenVideoCapture(cameraDevice)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error opening video device: %v", err), http.StatusInternalServerError)
 		return
 	}
-	defer device.Close()
+	defer webcam.Close()
+
+	img := gocv.NewMat()
+	defer img.Close()
 
 	w.Header().Set("Content-Type", "multipart/x-mixed-replace;boundary="+boundary)
 	multiPartWriter := multipart.NewWriter(w)
@@ -55,24 +54,22 @@ func streamHandler(w http.ResponseWriter, r *http.Request) {
 	multiPartWriter.SetBoundary(boundary)
 
 	for {
-		frame, err := device.Capture()
-		if err != nil {
-			log.Printf("Error capturing frame: %v", err)
+		if ok := webcam.Read(&img); !ok {
+			log.Printf("Error reading frame")
+			continue
+		}
+		if img.Empty() {
 			continue
 		}
 
-		frameData := make([]byte, frame.Size())
-		_, err = frame.Read(frameData)
+		buf, err := gocv.IMEncode(".jpg", img)
 		if err != nil {
-			log.Printf("Error reading frame data: %v", err)
+			log.Printf("Error encoding frame: %v", err)
 			continue
 		}
 
-		img, _, err := image.Decode(bytes.NewReader(frameData))
-		if err != nil {
-			log.Printf("Error decoding frame: %v", err)
-			continue
-		}
+		bufBytes := buf.GetBytes()
+		defer buf.Close()
 
 		partWriter, err := multiPartWriter.CreatePart(textproto.MIMEHeader{
 			"Content-Type": {"image/jpeg"},
@@ -82,12 +79,10 @@ func streamHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		err = jpeg.Encode(partWriter, img, &jpeg.Options{Quality: 75})
+		_, err = partWriter.Write(bufBytes)
 		if err != nil {
-			log.Printf("Error encoding frame: %v", err)
+			log.Printf("Error writing frame: %v", err)
 			continue
 		}
-
-		time.Sleep(33 * time.Millisecond)
 	}
 }
