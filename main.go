@@ -33,6 +33,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		<html>
 		<head><title>Go Pi Camera Stream</title></head>
 		<body>
+			<h1>Zora's Web Stream</h1>
 			<img src="/stream" style="width:640px;height:480px;" />
 		</body>
 		</html>
