@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
+	"go-mjpeg"
 	"github.com/gorilla/mux"
-	"github.com/jackson-ajar/go-mjpeg"
 	"github.com/korandiz/v4l"
 )
 
