@@ -7,7 +7,7 @@ RUN apt update
 RUN apt-get install build-essential libopencv-dev -y
 
 COPY requirements.txt requirements.txt
-RUN python3 -m pip install -r requirements.txt
+RUN python3 -m pip install --no-binary opencv-python-headless,opencv-contrib-python-headless -r requirements.txt
 
 COPY . .
 
