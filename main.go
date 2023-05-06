@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"image/jpeg"
 	"log"
+	"mime/multipart"
 	"net/http"
+	"net/textproto"
 
 	"github.com/korandiz/v4l"
 )
+
 
 const (
 	cameraDevice = "/dev/video0"
