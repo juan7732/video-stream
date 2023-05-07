@@ -1,9 +1,9 @@
-FROM hdgigante/python-opencv:4.7.0-debian
+FROM python:3.9-slim-buster
 
 WORKDIR /app
 
 COPY requirements.txt requirements.txt
-RUN #!bin/bash python -m pip install Flask
+RUN pip install -r requirements.txt
 
 COPY . .
 
